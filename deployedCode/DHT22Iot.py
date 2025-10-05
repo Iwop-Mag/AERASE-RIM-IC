@@ -3,7 +3,7 @@ import requests
 import adafruit_dht
 import board
 import logging
-import BlynkLib
+import blynklib
 
 # Configure logging
 logging.basicConfig(
@@ -21,7 +21,7 @@ BLYNK_URL = "https://blynk.cloud/external/api/update"
 
 # BlynkLib setup
 BLYNK_AUTH = BLYNK_TOKEN
-blynk = BlynkLib.Blynk(BLYNK_AUTH)
+blynk = blynklib.Blynk(BLYNK_AUTH)
 
 # ThingSpeak setup
 THINGSPEAK_API_KEY = "H0D24P8IQMPC0UY2"

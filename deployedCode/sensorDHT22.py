@@ -1,9 +1,9 @@
-import Adafruit_DHT
+import adafruit_dht
+import board
 from flask import Flask, render_template_string
 
-# DHT22 sensor type
-DHT_SENSOR = Adafruit_DHT.DHT22
-DHT_PIN = 4
+# Initialize DHT22 sensor on GPIO4
+dhtDevice = adafruit_dht.DHT22(board.D4)
 
 app = Flask(__name__)
 
@@ -27,10 +27,15 @@ HTML_TEMPLATE = """
 """
 
 def get_sensor_data():
-    humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
-    if humidity is not None and temperature is not None:
-        return round(temperature, 1), round(humidity, 1)
-    else:
+    try:
+        temperature = dhtDevice.temperature
+        humidity = dhtDevice.humidity
+        if temperature is not None and humidity is not None:
+            return round(temperature, 1), round(humidity, 1)
+        else:
+            return None, None
+    except RuntimeError as e:
+        print(f"Sensor read error: {e}")
         return None, None
 
 @app.route("/")

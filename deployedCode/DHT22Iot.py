@@ -80,7 +80,7 @@ def main():
                 send_to_thingspeak(temperature, humidity)
             else:
                 logging.info("Failed to retrieve data from sensor.")
-            time.sleep(15)
+            time.sleep(2.5)
     except KeyboardInterrupt:
         logging.info("Program terminated by user.")
     finally:

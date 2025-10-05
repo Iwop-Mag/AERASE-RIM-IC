@@ -3,6 +3,7 @@ import requests
 import adafruit_dht
 import board
 import logging
+import BlynkLib
 
 # Configure logging
 logging.basicConfig(
@@ -11,18 +12,22 @@ logging.basicConfig(
 )
 
 # DHT22 sensor setup
-DHT_PIN = board.D4  # Use board pin notation for compatibility with adafruit_dht
+DHT_PIN = board.D4
 dht_device = adafruit_dht.DHT22(DHT_PIN)
 
-# Blynk setup
+# Blynk HTTP API setup
 BLYNK_TOKEN = "R4vdNzbRI1OvW4iFFNvlGkw87SSiaguH"
 BLYNK_URL = "https://blynk.cloud/external/api/update"
+
+# BlynkLib setup
+BLYNK_AUTH = BLYNK_TOKEN
+blynk = BlynkLib.Blynk(BLYNK_AUTH)
 
 # ThingSpeak setup
 THINGSPEAK_API_KEY = "H0D24P8IQMPC0UY2"
 THINGSPEAK_URL = "https://api.thingspeak.com/update"
 
-def send_to_blynk(temperature, humidity):
+def send_to_blynk_http(temperature, humidity):
     try:
         temp_resp = requests.get(
             BLYNK_URL,
@@ -36,9 +41,17 @@ def send_to_blynk(temperature, humidity):
         )
         temp_resp.raise_for_status()
         hum_resp.raise_for_status()
-        logging.info("Data sent to Blynk successfully.")
+        logging.info("Data sent to Blynk HTTP API successfully.")
     except requests.RequestException as e:
-        logging.error(f"Error sending data to Blynk: {e}")
+        logging.error(f"Error sending data to Blynk HTTP API: {e}")
+
+def send_to_blynk_lib(temperature, humidity):
+    try:
+        blynk.virtual_write(0, temperature)
+        blynk.virtual_write(1, humidity)
+        logging.info(f"Sent via BlynkLib -> Temp:{temperature:.1f}°C  Hum:{humidity:.1f}%")
+    except Exception as e:
+        logging.error(f"BlynkLib error: {e}")
 
 def send_to_thingspeak(temperature, humidity):
     payload = {
@@ -74,13 +87,15 @@ def read_sensor():
 def main():
     try:
         while True:
+            blynk.run()  # BlynkLib event loop
             temperature, humidity = read_sensor()
             if temperature is not None and humidity is not None:
-                send_to_blynk(temperature, humidity)
+                send_to_blynk_http(temperature, humidity)
+                send_to_blynk_lib(temperature, humidity)
                 send_to_thingspeak(temperature, humidity)
             else:
                 logging.info("Failed to retrieve data from sensor.")
-            time.sleep(2.5)
+            time.sleep(15)
     except KeyboardInterrupt:
         logging.info("Program terminated by user.")
     finally:

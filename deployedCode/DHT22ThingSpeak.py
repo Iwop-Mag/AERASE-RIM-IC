@@ -3,7 +3,6 @@ import requests
 import adafruit_dht
 import board
 import logging
-import BlynkLib
 
 # Configure logging
 logging.basicConfig(
@@ -18,10 +17,6 @@ dht_device = adafruit_dht.DHT22(DHT_PIN)
 # Blynk HTTP API setup
 BLYNK_TOKEN = "R4vdNzbRI1OvW4iFFNvlGkw87SSiaguH"
 BLYNK_URL = "https://blynk.cloud/external/api/update"
-
-# BlynkLib setup
-BLYNK_AUTH = BLYNK_TOKEN
-blynk = BlynkLib.Blynk(BLYNK_AUTH)
 
 # ThingSpeak setup
 THINGSPEAK_API_KEY = "H0D24P8IQMPC0UY2"
@@ -44,14 +39,6 @@ def send_to_blynk_http(temperature, humidity):
         logging.info("Data sent to Blynk HTTP API successfully.")
     except requests.RequestException as e:
         logging.error(f"Error sending data to Blynk HTTP API: {e}")
-
-def send_to_blynk_lib(temperature, humidity):
-    try:
-        blynk.virtual_write(0, temperature)
-        blynk.virtual_write(1, humidity)
-        logging.info(f"Sent via BlynkLib -> Temp:{temperature:.1f}°C  Hum:{humidity:.1f}%")
-    except Exception as e:
-        logging.error(f"BlynkLib error: {e}")
 
 def send_to_thingspeak(temperature, humidity):
     payload = {
@@ -87,11 +74,9 @@ def read_sensor():
 def main():
     try:
         while True:
-            blynk.run()  # BlynkLib event loop
             temperature, humidity = read_sensor()
             if temperature is not None and humidity is not None:
                 send_to_blynk_http(temperature, humidity)
-                send_to_blynk_lib(temperature, humidity)
                 send_to_thingspeak(temperature, humidity)
             else:
                 logging.info("Failed to retrieve data from sensor.")

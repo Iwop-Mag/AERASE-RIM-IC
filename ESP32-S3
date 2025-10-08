@@ -1,0 +1,126 @@
+// ESP32-S3 + SIM900A: SoftAP + WebServer + GPRS HTTP fetch
+// Requires: TinyGSM library (install via Library Manager)
+
+#define TINY_GSM_MODEM_SIM900
+#include <TinyGsmClient.h>
+#include <WiFi.h>
+#include <WebServer.h>
+
+// --- WiFi Hotspot (SoftAP) ---
+const char* AP_SSID = "AERASE";
+const char* AP_PASS = "12345678";
+
+// --- SIM900A UART pins ---
+HardwareSerial GSM(1);
+const int PIN_RX = 16;   // ESP32-S3 RX (to SIM900A TX)
+const int PIN_TX = 17;   // ESP32-S3 TX (to SIM900A RX)
+const uint32_t GSM_BAUD = 9600;
+
+// --- GPRS credentials ---
+const char* APN       = "internet"; // Replace with your carrier APN
+const char* GPRS_USER = "";
+const char* GPRS_PASS = "";
+
+// --- HTTP target ---
+const char* HOST = "httpbin.org";
+const int   PORT = 80;
+const char* PATH = "/get";
+
+TinyGsm modem(GSM);
+TinyGsmClient client(modem);
+
+WebServer server(80);
+
+// Buffer for last fetched data
+String lastData = "No data yet.";
+
+// Function to fetch data from internet via SIM900A
+String fetchFromSIM900A() {
+  String response = "";
+
+  Serial.println("Restarting modem...");
+  modem.restart();
+
+  Serial.println("Waiting for network...");
+  if (!modem.waitForNetwork(30000)) {
+    return "Network failed";
+  }
+
+  Serial.println("Connecting GPRS...");
+  if (!modem.gprsConnect(APN, GPRS_USER, GPRS_PASS)) {
+    return "GPRS failed";
+  }
+
+  Serial.println("Connecting to host...");
+  if (!client.connect(HOST, PORT)) {
+    modem.gprsDisconnect();
+    return "Host connect failed";
+  }
+
+  // Send HTTP GET
+  client.print(String("GET ") + PATH + " HTTP/1.1\r\n");
+  client.print(String("Host: ") + HOST + "\r\n");
+  client.print("Connection: close\r\n\r\n");
+
+  // Read response
+  uint32_t start = millis();
+  while (millis() - start < 10000) {
+    while (client.available()) {
+      char c = client.read();
+      response += c;
+      start = millis();
+    }
+    if (!client.connected() && !client.available()) break;
+    delay(10);
+  }
+
+  client.stop();
+  modem.gprsDisconnect();
+
+  if (response.length() == 0) response = "No response";
+  return response;
+}
+
+// Web handler
+void handleRoot() {
+  String html = "<!DOCTYPE html><html><head><title>ESP32-S3 + SIM900A</title></head><body>";
+  html += "<h1>ESP32-S3 Hotspot</h1>";
+  html += "<p>This page is served by ESP32-S3.</p>";
+  html += "<h2>Latest Data from SIM900A:</h2>";
+  html += "<pre>" + lastData + "</pre>";
+  html += "<form action=\"/refresh\" method=\"POST\"><button type=\"submit\">Refresh Data</button></form>";
+  html += "</body></html>";
+  server.send(200, "text/html", html);
+}
+
+void handleRefresh() {
+  lastData = fetchFromSIM900A();
+  server.sendHeader("Location", "/");
+  server.send(303); // Redirect back to root
+}
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+
+  // Start GSM UART
+  GSM.begin(GSM_BAUD, SERIAL_8N1, PIN_RX, PIN_TX);
+
+  // Start WiFi hotspot
+  WiFi.softAP(AP_SSID, AP_PASS);
+  Serial.println("Hotspot started.");
+  Serial.print("Connect to SSID: ");
+  Serial.println(AP_SSID);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.softAPIP());
+
+  // Setup web server
+  server.on("/", handleRoot);
+  server.on("/refresh", HTTP_POST, handleRefresh);
+  server.begin();
+  Serial.println("Web server started.");
+}
+
+void loop() {
+  server.handleClient();
+}

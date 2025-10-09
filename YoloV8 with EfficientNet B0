@@ -1,0 +1,63 @@
+
+You sent
+from ultralytics import YOLO
+import cv2
+import numpy as np
+from tensorflow.keras.models import load_model
+
+# Load YOLOv8 model
+yolo_model = YOLO(r'C:\Users\Admin\PycharmProjects\PythonProject1\runs\detect\train11\weights\best.pt')
+
+# Load EfficientNet classifier
+classifier = load_model(r'C:\Users\Admin\PycharmProjects\PythonProject1\efficientnet_mosquito.h5')
+species_labels = ['Aedes aegypti', 'Aedes albopictus']
+
+# Preprocessing function for EfficientNet
+def preprocess_crop(crop):
+    crop = cv2.resize(crop, (240, 240))
+    crop = crop / 255.0
+    return np.expand_dims(crop, axis=0)
+
+# Start webcam
+cap = cv2.VideoCapture(0)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # Run YOLOv8 inference
+    results = yolo_model.predict(source=frame, imgsz=320, conf=0.5)
+    boxes = results[0].boxes.xyxy
+    confs = results[0].boxes.conf
+    classes = results[0].boxes.cls
+
+    # Annotate each detection
+    for i, box in enumerate(boxes):
+        x1, y1, x2, y2 = map(int, box)
+        crop = frame[y1:y2, x1:x2]
+
+        # Classify with EfficientNet
+        try:
+            prediction = classifier.predict(preprocess_crop(crop))
+            class_id = np.argmax(prediction)
+            label = species_labels[class_id]
+            confidence = prediction[0][class_id]
+        except Exception as e:
+            label = "Error"
+            confidence = 0.0
+
+        # Draw bounding box and label
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(frame, f'{label} ({confidence:.2f})', (x1, y1 - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+    # Show live frame
+    cv2.imshow('Mosquito Detection & Classification', frame)
+
+    # Exit on 'q'
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()

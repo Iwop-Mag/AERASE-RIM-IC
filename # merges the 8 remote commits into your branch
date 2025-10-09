@@ -1,0 +1,46 @@
+* [33mfd67a80[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mAI-Models[m[33m)[m hellio
+[31m|[m * [33medd6f29[m[33m ([m[1;31morigin/AI-Models[m[33m)[m Create YoloV8 with EfficientNet B0
+[31m|[m [32m|[m *   [33mf6c99fa[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #6 from Iwop-Mag/AI-Models
+[31m|[m [32m|[m [33m|[m[32m\[m  
+[31m|[m [32m|[m [33m|[m[32m/[m  
+[31m|[m [32m|[m[32m/[m[33m|[m   
+[31m|[m * [33m|[m [33m22533e3[m Add files via upload
+[31m|[m * [33m|[m [33m911f431[m Create YoloV8
+[31m|[m * [33m|[m [33md1d1f35[m EfficientnetV2S
+[31m|[m * [33m|[m [33m2ad053d[m MobileNetV2
+[31m|[m * [33m|[m [33m791341d[m Add files via upload
+[31m|[m * [33m|[m [33mb41172d[m MobileNetV3_Small Training Code
+[31m|[m * [33m|[m [33m06a75fd[m EfficientNet Training Code
+[31m|[m[31m/[m [33m/[m  
+* [33m|[m [33m3f17523[m aaaa
+[34m|[m [33m|[m * [33mc045ccb[m[33m ([m[1;31morigin/Hardware-Code[m[33m)[m  ESP32-S3
+[34m|[m [33m|[m[33m/[m  
+[34m|[m *   [33m5b3b821[m Merge pull request #5 from Iwop-Mag/GPIO
+[34m|[m [36m|[m[1;31m\[m  
+[34m|[m [36m|[m * [33mb103e72[m[33m ([m[1;31morigin/GPIO[m[33m)[m aa
+[34m|[m [36m|[m * [33m6b77c4a[m Changed PY again into CPP and used blynk-library linux.
+[34m|[m [36m|[m * [33m98846f8[m Changed the CPP into Python because CPP is not more compatible with the RasPi.
+[34m|[m * [1;31m|[m [33m7ff6449[m Merge pull request #4 from Iwop-Mag/GPIO
+[34m|[m [1;32m|[m[1;31m\[m[1;31m|[m 
+[34m|[m [1;32m|[m * [33mf42d646[m Made new CPP file for Blynk integration and isolated the Python file for DHT22ThingSpeak.
+[34m|[m [1;32m|[m * [33m169a94d[m for testing Blynk integration for Raspberry Pi 4B, to also activate it on the dashboard
+[34m|[m [1;32m|[m * [33mef97681[m Updated syntax for Raspberry Pi GPIO library and Blynk library.
+[34m|[m * [1;33m|[m [33mcae6530[m Merge pull request #3 from Iwop-Mag/GPIO
+[34m|[m [1;34m|[m[1;33m\[m[1;33m|[m 
+[34m|[m [1;34m|[m * [33meee9aaa[m Update DHT22Iot.py for a more efficient and integrated Blynk.io setup.
+[34m|[m [1;34m|[m * [33m6296832[m awaaaaa
+[34m|[m [1;34m|[m * [33m74cddcc[m Included Blynk and Thingspeak API for Internet of Things using Wifi Connection
+[34m|[m [1;34m|[m * [33m17f39c5[m changes in sensorDHT22.py: - added GPIO pin configuration for DHT22 sensor - updated data reading logic to use GPIO library - improved error handling for sensor read failures - optimized data processing for better performance - added comments for clarity and maintainability
+[34m|[m [1;34m|[m * [33m2d55f9f[m Added web dev for IoT
+[34m|[m [1;34m|[m * [33m18f07f0[m and renamed the file to testGPIO.cpp
+[34m|[m [1;34m|[m * [33m6f0d644[m Renamed the file extension of sensorDHT22 to .py for better clarity and compatibility with Python environments.
+[34m|[m [1;34m|[m * [33m0b755d4[m New Python-based DHT22 using Adafruit_DHT library
+[34m|[m * [1;35m|[m [33m7982afd[m Merge pull request #2 from Iwop-Mag/GPIO
+[34m|[m [1;36m|[m[1;35m\[m[1;35m|[m 
+[34m|[m [1;36m|[m * [33me2cfca3[m Test commit for GPIO C++ library
+[34m|[m * [31m|[m [33m2151c6f[m Merge pull request #1 from Iwop-Mag/GPIO-C++
+[34m|[m[34m/[m[31m|[m [31m|[m 
+[34m|[m [31m|[m[31m/[m  
+[34m|[m * [33md48f925[m Add files via upload
+[34m|[m[34m/[m  
+* [33mb7784fb[m Initial commit

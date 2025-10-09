@@ -14,31 +14,14 @@ logging.basicConfig(
 DHT_PIN = board.D4
 dht_device = adafruit_dht.DHT22(DHT_PIN)
 
-# Blynk HTTP API setup
-BLYNK_TOKEN = "R4vdNzbRI1OvW4iFFNvlGkw87SSiaguH"
-BLYNK_URL = "https://blynk.cloud/external/api/update"
-
 # ThingSpeak setup
 THINGSPEAK_API_KEY = "H0D24P8IQMPC0UY2"
 THINGSPEAK_URL = "https://api.thingspeak.com/update"
 
-def send_to_blynk_http(temperature, humidity):
-    try:
-        temp_resp = requests.get(
-            BLYNK_URL,
-            params={"token": BLYNK_TOKEN, "V0": temperature},
-            timeout=5
-        )
-        hum_resp = requests.get(
-            BLYNK_URL,
-            params={"token": BLYNK_TOKEN, "V1": humidity},
-            timeout=5
-        )
-        temp_resp.raise_for_status()
-        hum_resp.raise_for_status()
-        logging.info("Data sent to Blynk HTTP API successfully.")
-    except requests.RequestException as e:
-        logging.error(f"Error sending data to Blynk HTTP API: {e}")
+# ThingsBoard setup
+THINGSBOARD_HOST = "http://thingsboard.cloud"   # or "https://thingsboard.cloud"
+THINGSBOARD_TOKEN = "xi1xo2dglq42tvtj7xtq"
+THINGSBOARD_URL = f"{THINGSBOARD_HOST}/api/v1/{THINGSBOARD_TOKEN}/telemetry"
 
 def send_to_thingspeak(temperature, humidity):
     payload = {
@@ -52,6 +35,18 @@ def send_to_thingspeak(temperature, humidity):
         logging.info("Data sent to ThingSpeak successfully.")
     except requests.RequestException as e:
         logging.error(f"Error sending data to ThingSpeak: {e}")
+
+def send_to_thingsboard(temperature, humidity):
+    payload = {
+        "temperature": temperature,
+        "humidity": humidity
+    }
+    try:
+        resp = requests.post(THINGSBOARD_URL, json=payload, timeout=5)
+        resp.raise_for_status()
+        logging.info("Data sent to ThingsBoard successfully.")
+    except requests.RequestException as e:
+        logging.error(f"Error sending data to ThingsBoard: {e}")
 
 def read_sensor():
     try:
@@ -76,8 +71,8 @@ def main():
         while True:
             temperature, humidity = read_sensor()
             if temperature is not None and humidity is not None:
-                send_to_blynk_http(temperature, humidity)
                 send_to_thingspeak(temperature, humidity)
+                send_to_thingsboard(temperature, humidity)
             else:
                 logging.info("Failed to retrieve data from sensor.")
             time.sleep(15)

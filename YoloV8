@@ -1,0 +1,12 @@
+from ultralytics import YOLO
+
+# Load model
+model = YOLO('yolov8n.pt')  # or yolov8s.pt for better accuracy
+
+# Train
+model.train(
+    data= r'C:\Users\Admin\Downloads\Dataset_YoloV8\data.yaml',
+    epochs=50,
+    imgsz=320,
+    batch=32
+)
